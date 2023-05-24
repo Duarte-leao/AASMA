@@ -1,8 +1,6 @@
 
 
 import lbforaging
-
-
 from gym.envs.registration import register
 import gym 
 from gym import spaces
@@ -29,8 +27,10 @@ class CleaningEnv(gym.Env):
 
         self.grid = np.zeros((grid_size, grid_size))
         self.robot_positions = np.zeros((num_robots, 2), dtype=int)
-        self.dirt_positions = []
         self.viewer = None
+        self.dirt_removed = 0
+        self.dirt_positions1 ,self.dirt_positions2  = self.generate_dirt()
+        
 
         self.current_step = 0
 
@@ -40,7 +40,6 @@ class CleaningEnv(gym.Env):
         # Reset the environment
         self.grid = np.zeros((self.grid_size, self.grid_size))
         self.robot_positions = np.zeros((self.num_robots, 2), dtype=int)
-        self.dirt_positions = self.generate_dirt()
 
         # Set the current step count to zero
         self.current_step = 0
@@ -71,12 +70,20 @@ class CleaningEnv(gym.Env):
             elif action == 4:  # Move right
                 robot_pos[1] = min(self.grid_size - 1, robot_pos[1] + 1)
             elif action == 5:  # Clean
-                if np.any(np.all(self.dirt_positions == robot_pos, axis=0)):
-                    print(self.dirt_positions)
-                    self.dirt_positions = self.dirt_positions[self.dirt_positions != robot_pos]
-                    print('REMOVEU DIRT:',self.dirt_positions, 'ROBOT: ', robot_pos )   
-                    # mask = np.any(np.all(dirt_positions == rob_pos, axis=1), axis=0)
-                    # dirt_positions = dirt_positions[~mask]
+                if np.any(np.all(np.equal(robot_pos, self.dirt_positions1), axis=1)) :
+                    self.dirt_positions1 = np.delete(self.dirt_positions1, np.where(np.all(self.dirt_positions1 == robot_pos, axis=1)), axis=0)
+                
+                # if np.any(np.all(np.equal(robot_pos, self.dirt_positions2), axis=1)) :
+                #     same_position_robots = np.where(np.all(self.robot_positions == robot_pos, axis=1))[0]
+                #     print(same_position_robots)
+                #     if len(same_position_robots) > 1:
+
+                #         if np.all(actions[same_position_robots] == 5):
+                           
+                #             self.dirt_positions2 = np.delete(self.dirt_positions2, np.where(np.all(self.dirt_positions2 == robot_pos, axis=1)), axis=0)
+                
+
+
 
         # Increment the step count
         self.current_step += 1
@@ -98,66 +105,62 @@ class CleaningEnv(gym.Env):
 
         self.grid = np.zeros((self.grid_size, self.grid_size))
 
+        for i in range(self.dirt_positions1.shape[0]):
+            self.grid[self.dirt_positions1[i,0], self.dirt_positions1[i,1]] = 1 # Dirt that only one robot can pick up
+
+        for i in range(self.dirt_positions2.shape[0]):
+            self.grid[self.dirt_positions2[i,0], self.dirt_positions2[i,1]] = 2  # Dirt that two robots can pick up
+                
         for i in range(self.num_robots):
-            print('robot position',self.robot_positions[i] )
             row, col = self.robot_positions[i]
-            self.grid[row, col] = 1
-
-        for i in range(self.num_dirt):
-            print(self.dirt_positions[i])
-            # row, col = self.dirt_positions[i]
-            self.grid[self.dirt_positions[i,0], self.dirt_positions[i,1]] = 0.5  # Set dirt squares to grey
-            # print(self.grid)
-
+            self.grid[row, col] = 0.5
         return 
     
 
     # Should chage it ?? Create a better reward function ??? (not for right now)
     def _calculate_reward(self):
   
-        cleaned_area = np.sum(self.grid == 0.5)
+        cleaned_area1 = np.sum(self.grid == 1)
+        cleaned_area2 = np.sum(self.grid == 2)
         total_area = self.grid_size * self.grid_size
-        return 1 - (cleaned_area / total_area)
+        return 1 - ((cleaned_area1 + cleaned_area2) / total_area)
     
 
     def get_observation(self):
 
         # Get the current observation. THIS OBSRVATION HAS THE ROBOT POSITION AND DIRT POSITION [[agent1_pos], [agent2_pos], [dirt1],... ,[dirt n]]
 
-        observation = np.zeros((self.num_robots + self.num_dirt, 2 ), dtype=int)  
+        observation = np.zeros((self.num_robots + self.dirt_positions1.shape[0] + self.dirt_positions2.shape[0], 2 ), dtype=int)  
         for i in range(self.num_robots):
             observation[i] = self.robot_positions[i]
 
-        for i in range(self.num_robots, (self.num_robots + self.num_dirt)):
-            observation[i] = self.dirt_positions[i-self.num_robots]
+        for i in range(self.num_robots, (self.num_robots + self.dirt_positions1.shape[0])):
+            observation[i] = self.dirt_positions1[i-self.num_robots]
+        
+        for i in range((self.num_robots + self.dirt_positions1.shape[0]), observation.shape[0]):
+            observation[i] = self.dirt_positions2[i-self.num_robots - self.dirt_positions1.shape[0]]
 
         return observation
 
 
-    # def generate_dirt(self):
-    #     # Randomly generate dirt positions in the environment
-    #     num_dirt = random.randint(1, self.grid_size)  # Randomly select the number of dirt squares
-    #     dirt_positions = []
-
-    #     for i in range(num_dirt):
-    #         row = random.randint(0, self.grid_size - 1)
-    #         col = random.randint(0, self.grid_size - 1)
-    #         dirt_positions.append([row, col])
-
-    #     return dirt_positions
-
     def generate_dirt(self):
 
         # Randomly generate dirt positions in the environment
-        self.num_dirt = np.random.randint(1, self.grid_size)  # Randomly select the number of dirt squares
-        dirt_positions = np.empty((self.num_dirt,2), dtype=int)
-        print(self.num_dirt)
-        for i in range(self.num_dirt):
+        num_dirt1 = np.random.randint(pow(self.grid_size,2)*0.1, pow(self.grid_size,2)*0.6)  # Randomly select the number of dirt squares
+        num_dirt2 = np.random.randint(pow(self.grid_size,2)*0.1, pow(self.grid_size,2)*0.3)
+        dirt_positions_level1 = np.empty((num_dirt1,2), dtype=int)
+        dirt_positions_level2 = np.empty((num_dirt2,2), dtype=int)
+        for i in range(num_dirt1):
             row = np.random.randint(0, self.grid_size - 1)
             col = np.random.randint(0, self.grid_size - 1)
-            dirt_positions[i] = [row,col]
-        print('real dirt positions:', dirt_positions)
-        return dirt_positions
+            dirt_positions_level1[i] = [row,col]
+        
+        for i in range(num_dirt2):
+            row = np.random.randint(0, self.grid_size - 1)
+            col = np.random.randint(0, self.grid_size - 1)
+            dirt_positions_level2[i] = [row,col]
+        
+        return dirt_positions_level1, dirt_positions_level2
     
 
     def render(self):
@@ -182,39 +185,47 @@ class CleaningEnv(gym.Env):
             for j in range(self.grid_size):
                 if self.grid[i, j] == 0:
                     img[i * scale: (i + 1) * scale, j * scale: (j + 1) * scale, :] = 255  # White color for empty cells
-                elif self.grid[i, j] == 1:
-                    img[i * scale: (i + 1) * scale, j * scale: (j + 1) * scale, 1] = 255  # Green color for robot positions
                 elif self.grid[i, j] == 0.5:
-                    img[i * scale: (i + 1) * scale, j * scale: (j + 1) * scale, :] = [128, 128, 128]  # Grey color for dirt squares
-
+                    img[i * scale: (i + 1) * scale, j * scale: (j + 1) * scale, 1] = 255  # Green color for robot positions
+                elif self.grid[i, j] == 1:
+                    img[i * scale: (i + 1) * scale, j * scale: (j + 1) * scale, :] = [200, 200, 200]  # Grey color for dirt squares
+                elif self.grid[i, j] == 2:
+                    img[i * scale: (i + 1) * scale, j * scale: (j + 1) * scale, :] = [128, 128, 128]
         return img
+
 
 
 ######################################################  MAIN  #########################################################################
 
 # Create an instance of the cleaning environment
-env = CleaningEnv(grid_size=10, num_robots=2, max_episode_steps=100)
+# env = CleaningEnv(grid_size=5, num_robots=2, max_episode_steps=100)
 
-# Reset the environment
-observation = env.reset()
+# # Reset the environment
 
-# Run the simulation
-done = False
-while not done:
 
-    time.sleep(0.8)
-    env.render()
+# # Run the simulation
 
-    # Change action taking into account the agent we will use ( right now is random)
 
-    actions = np.random.randint(env.n_actions, size=2)
+# done = False
+# while not done:
 
-    # Take a step in the environment
+#     time.sleep(0.1)
+#     env.render()
 
-    observation, reward, _, info = env.step(actions)
+#     # Change action taking into account the agent we will use ( right now is random)
 
-    print(f"Timestep {env.current_step}")
-    # print(f"\tObservation: {observation}")
-    print(f"\tAction: {actions}\n")
+#     actions = np.random.randint(env.n_actions, size=2)
 
-env.close()
+#     # Take a step in the environment
+
+#     observation, reward, _, info = env.step(actions)
+
+#     print(f"Timestep {env.current_step}")
+#     print(f"\tObservation: {observation}")
+#     print(f"\tAction: {actions}\n")
+    
+#     if len(env.dirt_positions) == 0:
+#         break
+
+
+# env.close()
