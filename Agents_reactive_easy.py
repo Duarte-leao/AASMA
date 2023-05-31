@@ -51,8 +51,8 @@ class GreedyAgent():
     def action(self, observation) -> int:
         self.observation = observation
         agents_positions = self.observation[:self.n_agents, :]
-        dirt_position1 = self.observation[self.n_agents:env.dirt_positions1.shape[0], :]
-        dirt_position2 = self.observation[env.dirt_positions1.shape[0]:env.dirt_positions2.shape[0], :]
+        dirt_position1 = self.observation[self.n_agents:env.num_dirt1+self.n_agents, :]
+        dirt_position2 = self.observation[env.num_dirt1+self.n_agents:env.num_dirt1+self.n_agents+env.num_dirt2, :]
         actions = self.direction_to_go(agents_positions, dirt_position1, dirt_position2)
 
         return actions
@@ -61,11 +61,19 @@ class GreedyAgent():
 
         actions = np.zeros(self.n_agents, dtype=int)
         for i in range(self.n_agents):
-            # If the robot is on top of dirt 
             if np.any(np.all(np.equal(pos_agents[i], pos_dirt1), axis=1)):       
-                actions[i] = 5   #Clean
+                actions[i] = 5   
+
+            elif np.any(np.all(np.equal(pos_agents[i], pos_dirt2), axis=1)) :
+                    
+                    same_position_robots = np.where(np.all(pos_agents == pos_agents[i], axis=1))[0]
+                    if len(same_position_robots) > 1:
+                        actions[i] = 5
+                    else:
+                        actions[i] = np.random.randint(env.n_actions-1, size=1)
             else:
-                actions[i] = np.random.randint(env.n_actions, size=1)
+                actions[i] = np.random.randint(env.n_actions-1, size=1)
+                print('Change action')
 
         return actions
 
@@ -94,9 +102,3 @@ if __name__ == '__main__':
     for agent in agents:
         result = run_agent(env, agent, 1)
         # results[agent.name] = result
-
-
-
-
-
-

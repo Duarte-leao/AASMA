@@ -29,9 +29,9 @@ class CleaningEnv(gym.Env):
         self.robot_positions = np.zeros((num_robots, 2), dtype=int)
         self.viewer = None
         self.dirt_removed = 0
+        self.num_dirt1 = 0
+        self.num_dirt2 = 0
         self.dirt_positions1 ,self.dirt_positions2  = self.generate_dirt()
-        
-
         self.current_step = 0
 
 
@@ -72,16 +72,16 @@ class CleaningEnv(gym.Env):
             elif action == 5:  # Clean
                 if np.any(np.all(np.equal(robot_pos, self.dirt_positions1), axis=1)) :
                     self.dirt_positions1 = np.delete(self.dirt_positions1, np.where(np.all(self.dirt_positions1 == robot_pos, axis=1)), axis=0)
-                
-                # if np.any(np.all(np.equal(robot_pos, self.dirt_positions2), axis=1)) :
-                #     same_position_robots = np.where(np.all(self.robot_positions == robot_pos, axis=1))[0]
-                #     print(same_position_robots)
-                #     if len(same_position_robots) > 1:
+                    self.num_dirt1 = self.num_dirt1 - 1
 
-                #         if np.all(actions[same_position_robots] == 5):
+                if np.any(np.all(np.equal(robot_pos, self.dirt_positions2), axis=1)) :
+                    same_position_robots = np.where(np.all(self.robot_positions == robot_pos, axis=1))[0]
+                    
+                    if len(same_position_robots) > 1:
+                        if np.all(actions[same_position_robots] == 5):
                            
-                #             self.dirt_positions2 = np.delete(self.dirt_positions2, np.where(np.all(self.dirt_positions2 == robot_pos, axis=1)), axis=0)
-                
+                            self.dirt_positions2 = np.delete(self.dirt_positions2, np.where(np.all(self.dirt_positions2 == robot_pos, axis=1)), axis=0)
+                            self.num_dirt2 = self.num_dirt2 - 1
 
 
 
@@ -130,36 +130,43 @@ class CleaningEnv(gym.Env):
 
         # Get the current observation. THIS OBSRVATION HAS THE ROBOT POSITION AND DIRT POSITION [[agent1_pos], [agent2_pos], [dirt1],... ,[dirt n]]
 
-        observation = np.zeros((self.num_robots + self.dirt_positions1.shape[0] + self.dirt_positions2.shape[0], 2 ), dtype=int)  
+        observation = np.zeros((self.num_robots + self.num_dirt1 + self.num_dirt2, 2 ), dtype=int)  
         for i in range(self.num_robots):
             observation[i] = self.robot_positions[i]
 
-        for i in range(self.num_robots, (self.num_robots + self.dirt_positions1.shape[0])):
+        for i in range(self.num_robots, (self.num_robots + self.num_dirt1)):
             observation[i] = self.dirt_positions1[i-self.num_robots]
         
-        for i in range((self.num_robots + self.dirt_positions1.shape[0]), observation.shape[0]):
-            observation[i] = self.dirt_positions2[i-self.num_robots - self.dirt_positions1.shape[0]]
-
+        for i in range((self.num_robots + self.num_dirt1), observation.shape[0]):
+            observation[i] = self.dirt_positions2[i-self.num_robots - self.num_dirt1]
+        
         return observation
 
 
     def generate_dirt(self):
 
         # Randomly generate dirt positions in the environment
-        num_dirt1 = np.random.randint(pow(self.grid_size,2)*0.1, pow(self.grid_size,2)*0.6)  # Randomly select the number of dirt squares
-        num_dirt2 = np.random.randint(pow(self.grid_size,2)*0.1, pow(self.grid_size,2)*0.3)
-        dirt_positions_level1 = np.empty((num_dirt1,2), dtype=int)
-        dirt_positions_level2 = np.empty((num_dirt2,2), dtype=int)
-        for i in range(num_dirt1):
+        self.num_dirt1 = np.random.randint(pow(self.grid_size,2)*0.1, pow(self.grid_size,2)*0.5)  # Randomly select the number of dirt squares
+        self.num_dirt2 = np.random.randint(pow(self.grid_size,2)*0.1, pow(self.grid_size,2)*0.2)
+        dirt_positions_level1 = np.empty((self.num_dirt1,2), dtype=int)
+        dirt_positions_level2 = np.empty((self.num_dirt2,2), dtype=int)
+
+        for i in range(self.num_dirt1):
             row = np.random.randint(0, self.grid_size - 1)
             col = np.random.randint(0, self.grid_size - 1)
+            while np.any(np.all(np.equal(dirt_positions_level1, [row, col]), axis=1)) :
+                row = np.random.randint(0, self.grid_size - 1)
+                col = np.random.randint(0, self.grid_size - 1)
             dirt_positions_level1[i] = [row,col]
-        
-        for i in range(num_dirt2):
+
+        for i in range(self.num_dirt2):
             row = np.random.randint(0, self.grid_size - 1)
             col = np.random.randint(0, self.grid_size - 1)
+
+            while np.any(np.all(np.equal(dirt_positions_level1, [row, col]), axis=1)) or np.any(np.all(np.equal(dirt_positions_level2, [row, col]), axis=1)):
+                row = np.random.randint(0, self.grid_size - 1)
+                col = np.random.randint(0, self.grid_size - 1)
             dirt_positions_level2[i] = [row,col]
-        
         return dirt_positions_level1, dirt_positions_level2
     
 
