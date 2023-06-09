@@ -34,8 +34,8 @@ class CleaningEnv(gym.Env):
         self.num_dirt2 = 0
         self.min1 = np.zeros(num_robots)
         self.min2 = np.zeros(num_robots)
-        self.dirt_positions1 ,self.dirt_positions2  = self.generate_dirt()
-        # self.dirt_positions1 ,_  = self.generate_dirt()
+        # self.dirt_positions1 ,self.dirt_positions2  = self.generate_dirt()
+        self.dirt_positions1 ,_  = self.generate_dirt()
 
         self.current_step = 0
 
@@ -80,24 +80,24 @@ class CleaningEnv(gym.Env):
                 self.dirt_positions1 = np.delete(self.dirt_positions1, np.where(np.all(self.dirt_positions1 == robot_pos, axis=1)), axis=0)
                 self.dirt_removed1[i] +=1
                 self.num_dirt1 = self.num_dirt1 - 1
-            if np.any(np.all(np.equal(robot_pos, self.dirt_positions2), axis=1)) :
+            # if np.any(np.all(np.equal(robot_pos, self.dirt_positions2), axis=1)) :
 
-                self.same_position_robots = np.where(np.all(self.robot_positions == robot_pos, axis=1))[0]
+            #     self.same_position_robots = np.where(np.all(self.robot_positions == robot_pos, axis=1))[0]
             
-                if len(self.same_position_robots) > 1:
-                    count = 0
-                    for i in range (len(self.same_position_robots)):
+            #     if len(self.same_position_robots) > 1:
+            #         count = 0
+            #         for i in range (len(self.same_position_robots)):
 
-                        if np.all(actions[int(self.same_position_robots[i])] == 5):
-                            count +=1
+            #             if np.all(actions[int(self.same_position_robots[i])] == 5):
+            #                 count +=1
                             
-                        if count == 2 : 
-                            self.dirt_positions2 = np.delete(self.dirt_positions2, np.where(np.all(self.dirt_positions2 == robot_pos, axis=1)), axis=0)
-                            self.dirt_removed2[i] +=1
-                            self.dirt_removed2[self.same_position_robots[self.same_position_robots!=i]] +=1
+            #             if count == 2 : 
+            #                 self.dirt_positions2 = np.delete(self.dirt_positions2, np.where(np.all(self.dirt_positions2 == robot_pos, axis=1)), axis=0)
+            #                 self.dirt_removed2[i] +=1
+            #                 self.dirt_removed2[self.same_position_robots[self.same_position_robots!=i]] +=1
 
-                            self.num_dirt2 = self.num_dirt2 - 1
-                            break
+            #                 self.num_dirt2 = self.num_dirt2 - 1
+            #                 break
 
 
         # Increment the step count
@@ -123,8 +123,8 @@ class CleaningEnv(gym.Env):
         for i in range(self.dirt_positions1.shape[0]):
             self.grid[self.dirt_positions1[i,0], self.dirt_positions1[i,1]] = 1 # Dirt that only one robot can pick up
 
-        for i in range(self.dirt_positions2.shape[0]):
-            self.grid[self.dirt_positions2[i,0], self.dirt_positions2[i,1]] = 2  # Dirt that two robots can pick up
+        # for i in range(self.dirt_positions2.shape[0]):
+        #     self.grid[self.dirt_positions2[i,0], self.dirt_positions2[i,1]] = 2  # Dirt that two robots can pick up
                 
         for i in range(self.num_robots):
             row, col = self.robot_positions[i]
@@ -148,11 +148,11 @@ class CleaningEnv(gym.Env):
             #     reward = reward +1
             # elif np.any(np.all(np.equal(self.robot_positions[i], self.dirt_positions2), axis=1)) :
             #         reward = reward +1
-            if self.dirt_removed2[i] > self.min2[i]:                                                                  # if they clean dirt2
-                reward =  200 * self.dirt_removed2[i]
-                self.min2[i] = self.dirt_removed2[i]
-            else:   
-                reward = reward - 1
+            # if self.dirt_removed2[i] > self.min2[i]:                                                                  # if they clean dirt2
+            #     reward =  200 * self.dirt_removed2[i]
+            #     self.min2[i] = self.dirt_removed2[i]
+            # else:   
+            #     reward = reward - 1
 
             # elif np.any(np.all(np.equal(self.robot_positions[i], self.dirt_positions2), axis=1)) :                         #If two robots in the same position
 
@@ -187,8 +187,8 @@ class CleaningEnv(gym.Env):
         for i in range(self.num_robots, (self.num_robots + self.num_dirt1)):
             observation[i] = self.dirt_positions1[i-self.num_robots]
         
-        for i in range((self.num_robots + self.num_dirt1), observation.shape[0]):
-            observation[i] = self.dirt_positions2[i-self.num_robots - self.num_dirt1]
+        # for i in range((self.num_robots + self.num_dirt1), observation.shape[0]):
+        #     observation[i] = self.dirt_positions2[i-self.num_robots - self.num_dirt1]
         
         return observation
 
@@ -198,7 +198,7 @@ class CleaningEnv(gym.Env):
         # Randomly generate dirt positions in the environment
         self.num_dirt1 = np.random.randint(pow(self.grid_size,2)*0.1, pow(self.grid_size,2)*0.15)  # Randomly select the number of dirt squares
         # self.num_dirt2 = np.random.randint(pow(self.grid_size,2)*0., pow(self.grid_size,2)*0.06)
-        self.num_dirt2 = 1
+        self.num_dirt2 = 0
         dirt_positions_level1 = np.empty((self.num_dirt1,2), dtype=int)
         dirt_positions_level2 = np.empty((self.num_dirt2,2), dtype=int)
 
@@ -228,7 +228,7 @@ class CleaningEnv(gym.Env):
             self.viewer = rendering.SimpleImageViewer()
 
         img = self._get_render_image()
-        # self.viewer.imshow(img)
+        self.viewer.imshow(img)
         return self.viewer.isopen
 
     def close(self):

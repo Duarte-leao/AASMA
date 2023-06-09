@@ -152,22 +152,22 @@ if __name__ == '__main__':
 
     # env_train = CleaningEnv(grid_size, n_robots1, max_steps)
     # env_eval = CleaningEnv(grid_size, n_robots1, max_steps)
-
+    # with open('\Q_learning_hard_2.pkl', 'rb') as file:
+    #     agent = dill.load(file)
     # 2 - Setup agent
     agents = [
          QLearningAgent(agent_id=0, n_robots=n_robots1, n_actions=5),
          QLearningAgent(agent_id=1, n_robots=n_robots1, n_actions=5)
     ]
 
-
     # 3 - Evaluate agent
     results = {}
         
-    result = train_eval_loop_single( 'QLearning Team' ,agents, 2000, 100, 20)
-    results[agents[0]] = result
+    result = train_eval_loop_single( 'QLearning Team' ,agent, 2, 200, 20)
+    results[agent[0]] = result
 
 
-    with open(F'\Q_learning_hard_1.pkl', 'wb') as file:
-        dill.dump(agents, file)
+    # with open(F'\Q_learning_hard_2.pkl', 'wb') as file:
+    #     dill.dump(agents, file)
     # joblib.dump(agents, 'Q_learning_easy_1.pkl')
-compare_results_learning(results, title="Agents on 'Cleaning' Environment", colors=["orange", "green"])
+compare_results_learning(results, title="Agents on 'Cleaning' Environment", colors=["orange"])
