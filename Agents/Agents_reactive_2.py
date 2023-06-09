@@ -20,8 +20,8 @@ def run_agent( agent, n_episodes: int,  grid_size, n_robots1, max_steps)  -> np.
         observation = environment.reset()
         done = False
         while not done:
-            time.sleep(0.3)
-            environment.render()
+            # time.sleep(0.3)
+            # environment.render()
             
             actions = agent.action(observation, environment.num_dirt1)
             observation, reward, done, info = environment.step(actions)
@@ -56,7 +56,6 @@ class Reactive_2(Agent):
                 near_dirt = self.closest_dirt2( agents_positions, dirt_position2, agents_positions[i])
                 action = self.direction_to_go1(agents_positions[i], near_dirt)
                 
-
                 if np.any(np.all(np.equal(agents_positions[i], dirt_position2), axis=1)) :
                     same_position_robots = np.where(np.all(agents_positions == agents_positions[i], axis=1))[0]
                 
@@ -149,7 +148,7 @@ class Reactive_2(Agent):
 
 if __name__ == '__main__':
 
-    grid_size = 7
+    grid_size = 5
     n_robots = 2
     max_steps = 500
     n_episodes = 20

@@ -11,12 +11,12 @@ def run_agent( agent, n_episodes: int,  grid_size, n_robots1, max_steps)  -> np.
     results_b = np.zeros(n_episodes)
 
     for episode in range(n_episodes):
-
+        
         environment = CleaningEnv(grid_size, n_robots1, max_steps)
         observation = environment.reset()
         done = False
         while not done:
-            time.sleep(0.1)
+            time.sleep(1)
             environment.render()
             
             actions = agent.action(observation, environment.num_dirt1)
@@ -70,7 +70,7 @@ class Reactive_0(Agent):
 
 if __name__ == '__main__':
 
-    grid_size = 5
+    grid_size = 10
     n_robots = 2
     max_steps = 400
     n_episodes = 20

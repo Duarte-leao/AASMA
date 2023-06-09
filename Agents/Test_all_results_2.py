@@ -8,7 +8,7 @@ from Agents_Role import Agent_role
 from Results_analysis import compare_results
 import itertools
 import dill
-
+import cloudpickle
 
 import numpy as np
 import time
@@ -25,11 +25,11 @@ def run_agent( agent,  n_episodes: int,  grid_size, n_robots1, max_steps)  -> np
         observation = environment.reset()
         done = False
         while not done:
-            # time.sleep(0.3)
+    
             if (environment.num_dirt1 + environment.num_dirt2) == 0:
                 break
 
-            environment.render()
+            # environment.render()
             actions = agent.action(observation, environment.num_dirt1)
             observation, reward, done, info = environment.step(actions)
         environment.close()
@@ -57,10 +57,6 @@ def run_agent_Ql( agents, n_episodes: int,  grid_size, n_robots1, max_steps) -> 
             # environment.render()
             if (environment.num_dirt1 + environment.num_dirt2) == 0:
                  break
-            
-            # if agents[0].training == False:
-            #     time.sleep(0.5)
-        
         
             actions = [agent.action(observations, environment.num_dirt1) for agent in agents]
             next_observations, rewards, done, info = environment.step(actions)
@@ -99,7 +95,7 @@ if __name__ == '__main__':
     max_steps = 500
     n_episodes = 20
 
-    with open('\Q_learning_hard_3.pkl', 'rb') as file:
+    with open('Q_learning_hard_3.pkl', 'rb') as file:
         Q_learning = dill.load(file)
 
     # 2 - Setup agents

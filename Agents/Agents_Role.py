@@ -20,8 +20,8 @@ def run_agent( agent, n_episodes: int,  grid_size, n_robots1, max_steps)  -> np.
         observation = environment.reset()
         done = False
         while not done:
-            time.sleep(0.3)
-            environment.render()
+            # time.sleep(0.3)
+            # environment.render()
             
             actions = agent.action(observation, environment.num_dirt1)
             observation, reward, done, info = environment.step(actions)

@@ -1,5 +1,5 @@
 from Environment_clean import CleaningEnv
-from Q_learning.Results_analysis import compare_results
+from Results_analysis import compare_results
 from Agents import Agent 
 import numpy as np
 import time
@@ -16,8 +16,8 @@ def run_agent( agent, n_episodes: int,  grid_size, n_robots1, max_steps)  -> np.
         observation = environment.reset()
         done = False
         while not done:
-            time.sleep(0.1)
-            environment.render()
+            # time.sleep(0.1)
+            # environment.render()
             
             actions = agent.action(observation, environment.num_dirt1)
             observation, reward, done, info = environment.step(actions)

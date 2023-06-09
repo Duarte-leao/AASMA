@@ -20,7 +20,7 @@ def run_agent( agent, n_episodes: int,  grid_size, n_robots1, max_steps)  -> np.
         done = False
         while not done:
             # time.sleep(0.3)
-            environment.render()
+            # environment.render()
             
             actions = agent.action(observation, environment.num_dirt1)
             observation, reward, done, info = environment.step(actions)
@@ -162,7 +162,7 @@ class Reactive_1(Agent):
 
 if __name__ == '__main__':
 
-    grid_size = 7
+    grid_size = 5
     n_robots = 2
     max_steps = 500
     n_episodes = 100

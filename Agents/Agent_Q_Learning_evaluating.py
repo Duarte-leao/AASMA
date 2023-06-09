@@ -28,8 +28,8 @@ def run_agent( agents,  n_episodes: int, grid_size, n_robots, max_steps) -> np.n
 
         while not done:
             
-            environment.render()
-            time.sleep(0.3)
+            # environment.render()
+            # time.sleep(0.3)
             if (environment.num_dirt1 + environment.num_dirt2) == 0:
                  break
             
@@ -60,7 +60,7 @@ if __name__ == '__main__':
     max_steps = 300
     n_episodes = 20
 
-    with open('\Q_learning_hard_3.pkl', 'rb') as file:
+    with open('Q_learning_hard_3.pkl', 'rb') as file:
         agent = dill.load(file)
 
     results = {}

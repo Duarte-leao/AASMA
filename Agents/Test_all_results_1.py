@@ -1,11 +1,12 @@
+
 from Environment_clean import CleaningEnv
 from Agents_random import RandomAgent
-from Q_learning.Results_analysis import compare_results
+from Results_analysis import compare_results
 from Agents_random import RandomAgent
-from Q_learning.Agents_reactive_0 import Reactive_0
-from Q_learning.Agents_reactive_1 import Reactive_1
-from Q_learning.Agents_reactive_2 import Reactive_2
-from Agents.Agents_Role import Agent_role
+from Agents_reactive_0 import Reactive_0
+from Agents_reactive_1 import Reactive_1
+from Agents_reactive_2 import Reactive_2
+from Agents_Role import Agent_role
 
 
 import numpy as np
@@ -24,7 +25,7 @@ def run_agent( agent, n_episodes: int,  grid_size, n_robots1, max_steps)  -> np.
         done = False
         while not done:
         
-            environment.render()
+            # environment.render()
             
             actions = agent.action(observation, environment.num_dirt1)
             observation, reward, done, info = environment.step(actions)
