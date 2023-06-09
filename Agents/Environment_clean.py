@@ -3,6 +3,7 @@ from gym.envs.registration import register
 import gym 
 from gym.envs.classic_control import rendering
 import numpy as np
+import sys
 
 
 class CleaningEnv(gym.Env):

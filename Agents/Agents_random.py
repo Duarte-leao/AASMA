@@ -1,5 +1,5 @@
 from Environment_clean import CleaningEnv
-from Results_analysis import compare_results
+from Q_learning.Results_analysis import compare_results
 from Agents import Agent 
 import numpy as np
 import time

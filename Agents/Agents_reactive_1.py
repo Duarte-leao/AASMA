@@ -19,7 +19,7 @@ def run_agent( agent, n_episodes: int,  grid_size, n_robots1, max_steps)  -> np.
         observation = environment.reset()
         done = False
         while not done:
-            time.sleep(0.3)
+            # time.sleep(0.3)
             environment.render()
             
             actions = agent.action(observation, environment.num_dirt1)
@@ -54,7 +54,8 @@ class Reactive_1(Agent):
         actions = []
         heuristic_dirt1 = math.inf
         heuristic_dirt2 = math.inf
-
+        agents_nearby_dirt2 = 0
+        
         for i in range(self.n_agents):
             
             if len(dirt_position1) > 0:
@@ -164,7 +165,7 @@ if __name__ == '__main__':
     grid_size = 7
     n_robots = 2
     max_steps = 500
-    n_episodes = 20
+    n_episodes = 100
     n_actions = 6
     
     agent =  Reactive_1( n_robots, n_actions)
