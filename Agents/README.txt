@@ -10,5 +10,5 @@ To run an individually agent run:
 -Agents_reactive_1.py
 -Agents_reactive_2.py
 -Agents_Role.py
--Agent_Q_learning_evaluation.py
+-Agent_Q_learning_evaluation.py (attention be on the directory of the folder)
 

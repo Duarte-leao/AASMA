@@ -19,21 +19,17 @@ def train_eval_loop_single( team, agents, n_evaluations, n_training_episodes, n_
 
     for evaluation in range(n_evaluations):
 
-        print(f"\tIteration {evaluation+1}/{n_evaluations}")
         # Train
-        print(f"\t\tTraining {team} for {n_training_episodes} episodes.")
 
         for agent in agents: agent.train()   # Enables training mode
         # Run train iteration
         run_agent( agents, n_training_episodes, grid_size, n_robots, max_steps)
 
         # Eval
-        print(f"\t\tEvaluating {team} for {n_eval_episodes} episodes.")
         for agent in agents: agent.eval()  
 
         # Run eval iteration
         results[evaluation] = run_agent( agents ,n_eval_episodes, grid_size, n_robots, max_steps)
-        print(f"\t\tAverage Steps To Capture: {round(results[evaluation].mean(), 2)}")
    
     return results
 
@@ -131,7 +127,6 @@ if __name__ == '__main__':
          QLearningAgent(n_robots, n_actions=5)
     ]
 
-    # 3 - Evaluate agent
     results = {}
         
     result = train_eval_loop_single( 'QLearning Team' ,agents, n_evaluations, n_train, n_epsidoe_evaluations, grid_size, n_robots, max_steps)
